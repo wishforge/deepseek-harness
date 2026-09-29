@@ -1,0 +1,31 @@
+# Bilingual-pair consistency record for 2026-09-29-runtime-capability-jsonrpc-surface.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-09-29-runtime-capability-jsonrpc-surface.md
+/agent-note-runtime-capability-surface-over-stdio-json-rpc:
+  en: 6677adce2055f3c2
+  zh: d78dab44b34f94ba
+/agent-note-runtime-capability-surface-over-stdio-json-rpc/problem:
+  en: fdfd0b3cdc1e1392
+  zh: 8c59817a87987bba
+/agent-note-runtime-capability-surface-over-stdio-json-rpc/decision:
+  en: e5dd59b5105ecb55
+  zh: fed92d91902a9395
+/agent-note-runtime-capability-surface-over-stdio-json-rpc/wire-contract:
+  en: 3c89d11afae6f3d1
+  zh: fc176d537250d872
+/agent-note-runtime-capability-surface-over-stdio-json-rpc/scope-semantics:
+  en: d13306785fbee33b
+  zh: 1b5219a2ae1bd947
+/agent-note-runtime-capability-surface-over-stdio-json-rpc/alternatives-considered:
+  en: 6a19a86d0d3168b9
+  zh: ba755dff9774bf4d
+/agent-note-runtime-capability-surface-over-stdio-json-rpc/consequences:
+  en: c9b7a532cf6924a7
+  zh: 4eb065a0b6acd0af
+/agent-note-runtime-capability-surface-over-stdio-json-rpc/testing:
+  en: 76cca69d2cc4cf9d
+  zh: a7a82e606865dab1
+/agent-note-runtime-capability-surface-over-stdio-json-rpc/related:
+  en: d1868c1afbad2eed
+  zh: 67e4e73c14466dff
