@@ -189,6 +189,9 @@ export const PROFILE_TEMPLATES: Record<string, ProfileTemplate> = {
   sdk: {
     bundles: ['@deepseek-ai/dsh-base', '@deepseek-ai/dsh-sdk-app'],
   },
+  'harness-capability': {
+    bundles: ['@deepseek-ai/dsh-base', '@deepseek-ai/dsh-harness-app'],
+  },
   'sdk-minimal': {
     bundles: ['@deepseek-ai/dsh-sdk-minimal'],
   },

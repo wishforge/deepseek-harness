@@ -1,0 +1,14 @@
+# The harness-capability application over dsh-base. Stdout belongs exclusively
+# to JSON-RPC.
+
+- id: hmr
+  disabled: true
+
+- insert:
+    - id: harness-app-startup
+      name: '@deepseek-ai/dsh-harness-app'
+      config:
+        profile: harness-capability
+
+    - id: harness-jsonrpc-server
+      name: '@deepseek-ai/dsh-harness-jsonrpc-server'
