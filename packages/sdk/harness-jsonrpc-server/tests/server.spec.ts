@@ -120,6 +120,46 @@ describe('HarnessJsonRpcServer.handleRequest', () => {
     await expect(server.handleRequest('shutdown', {})).resolves.toEqual({})
     await expect(server.handleRequest('get_context', {})).rejects.toThrow('shutting down')
   })
+
+  it('requires the sandboxPolicy service at construction', () => {
+    const ctx = new Context()
+    ctx.provide('harnessAppStartup', { accepted: true })
+    expect(() => new HarnessJsonRpcServer(ctx, new FakeTransport()))
+      .toThrow('harness-jsonrpc-server requires the sandboxPolicy service')
+  })
+
+  it('rejects a non-string scopeId, including JSON null', async () => {
+    const { server } = mountServer({ mode: 'workspace-write', workspaceRoot: '/tmp/ws' })
+    await expect(server.handleRequest('policy_check', { operation: 'read', path: '/x', scopeId: 42 }))
+      .rejects.toThrow('invalid params: scopeId must be a string')
+    // Wire contract (SPEC §7/F1): absent means omitted, never null — null is a
+    // type error, which is exactly why the codex handler drops the key.
+    await expect(server.handleRequest('policy_check', { operation: 'read', path: '/x', scopeId: null }))
+      .rejects.toThrow('invalid params: scopeId must be a string')
+  })
+
+  it('dispose() tears down scopes without blocking later reads', async () => {
+    const { server } = mountServer({ mode: 'workspace-write', workspaceRoot: '/tmp/ws' })
+    await server.handleRequest('create_scope', { key: 's1' })
+    await server.dispose()
+    // Unlike shutdown(), dispose() is the effect-teardown path: no flag, and the
+    // scope map is emptied.
+    const context = await server.handleRequest('get_context', {}) as { scopes: string[] }
+    expect(context.scopes).toEqual([])
+  })
+
+  it('propagates single and multiple scope-teardown failures', async () => {
+    const { server } = mountServer({ mode: 'workspace-write', workspaceRoot: '/tmp/ws' })
+    const internals = server as unknown as { scopes: Map<string, { scope: { dispose(): Promise<void> } }> }
+    const failing = (message: string) => ({ scope: { dispose: () => Promise.reject(new Error(message)) } })
+
+    internals.scopes.set('bad', failing('boom'))
+    await expect(server.dispose()).rejects.toThrow('boom')
+
+    internals.scopes.set('bad1', failing('boom-1'))
+    internals.scopes.set('bad2', failing('boom-2'))
+    await expect(server.dispose()).rejects.toThrow(AggregateError)
+  })
 })
 
 /** Mount the real plugin on a context with fake required services and in-memory stdio. */
@@ -213,5 +253,17 @@ describe('harness-jsonrpc-server plugin wiring', () => {
       error: { code: -32603 },
     })
     expect(frame.error.message).toContain('unknown DeepSeek Harness runtime capability method')
+  })
+
+  it('answers a shutdown frame, disposes the root, and exits 0 once', async () => {
+    const { send, waitForLine, exits } = await mountPlugin({ mode: 'workspace-write', workspaceRoot: '/tmp/ws' })
+    send({ id: 11, method: 'shutdown', params: {} })
+    const frame = JSON.parse(await waitForLine())
+    expect(frame).toMatchObject({ jsonrpc: '2.0', id: 11, result: {} })
+    // disposeAndExit runs on setImmediate, after the response frame is written.
+    for (let i = 0; i < 50 && exits.length === 0; i++) {
+      await new Promise(resolve => setTimeout(resolve, 10))
+    }
+    expect(exits).toEqual([0])
   })
 })
